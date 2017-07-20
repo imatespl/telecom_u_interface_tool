@@ -1,0 +1,551 @@
+$(document).ready(function() {
+    $("input[type=submit]").button().click(function(event){event.preventDefault});
+    $("input[type=button]").button().click(function(event){event.preventDefault});
+    $("#uc_tabs").accordion({ collapsible: true });
+    $("#uc_Body_R_StartTime").datetimepicker();
+    $("#uc_Body_R_EndTime").datetimepicker();
+    $("#0_uc_Body_C_Starttime").datetimepicker();
+    $("#0_uc_Body_C_Stoptime").datetimepicker();
+    $("#uc_Body_R_StartTime1").datetimepicker();
+    $("#uc_Body_R_EndTime1").datetimepicker();
+    $("#uc_ud_show").tabs();
+    $("#uc_ud_show").width($(window).width()-375);
+    $("#uc_ack").height($(window).height()-$("#nav_header").height()-95);
+    $("#ud_show").height($(window).height()-$("#nav_header").height()-95);
+    $("#uc_ack_clear").click(function(){
+    		$("#uc_ack > div").remove();
+    	});
+    $("#ud_show_clear").click(function(){
+    		$("#ud_show > div").remove();
+    	});
+    $(window).resize( function(event) {
+            $("#uc_ud_show").width($(window).width()-375);        
+            $("#uc_ack").height($(window).height()-$("#nav_header").height()-95);
+            $("#ud_show").height($(window).height()-$("#nav_header").height()-95);
+        });
+    $("#datepicker2").datetimepicker();
+    //$("#uc_ack").height($(window).height()-$(form_bottom).height()-10);
+    //$("#ud_show").height($(window).height()-$(form_bottom).height()-10);
+    $( "#dialog" ).dialog({ hide: "explode" });
+    $("#dyinput_IP_Add").click(function(){
+    			$($("#dyinput_IP_hidden").html().replace(/\n|\r/g,"")).appendTo($("#dyinput_IP"));
+    	});
+    $("#dyinput_Message_Add").click(function(){
+    			$($("#dyinput_Message_hidden").html().replace(/\n|\r/g,"")).appendTo($("#dyinput_Message"));
+    	});
+    $("#dyinput_Time_Add").click(function(){
+					var startTimeId = $("#dyinput_Time ul li:nth-last-child(2) input").attr("id");
+					var endTimeId  = $("#dyinput_Time ul li:nth-last-child(1) input").attr("id");
+					var startTimeName = $("#dyinput_Time ul li:nth-last-child(2) input").attr("name");
+					var endTimeName = $("#dyinput_Time ul li:nth-last-child(1) input").attr("name");
+					var Tnum = (parseInt(startTimeId.substring(0, 1)) + 1).toString(); 
+    			$('<li><label>管理起始时间(C_Starttime):</label><input type="text"  value="00/00/0000 00:00" class="cw120"/></li><li><label>管理终止时间(C_Stoptime):</label><input type="text" value="00/00/0000 00:00" class="cw120"/></li></ul></div>').appendTo($("#dyinput_Time ul"));
+					$("#dyinput_Time ul li:nth-last-child(2) input").attr("id", Tnum + startTimeId.substring(1));
+					$("#dyinput_Time ul li:nth-last-child(1) input").attr("id", Tnum + endTimeId.substring(1));
+					$("#dyinput_Time ul li:nth-last-child(2) input").attr("name", Tnum + startTimeName.substring(1));
+					$("#dyinput_Time ul li:nth-last-child(1) input").attr("name", Tnum + startTimeName.substring(1));
+
+					$("#"+(Tnum + startTimeId.substring(1))).datetimepicker();
+					$("#"+(Tnum + endTimeId.substring(1))).datetimepicker();
+    	});
+    	
+    $("#dyinput_IP_Del").click(function(){
+    			$("#dyinput_IP div:nth-last-child(1)").remove();
+    	});
+    $("#dyinput_Message_Del").click(function(){
+    			$("#dyinput_Message div:nth-last-child(1)").remove();
+    	});
+    $("#dyinput_Time_Del").click(function(){
+    			$("#dyinput_Time ul li:nth-last-child(1)").remove();
+					$("#dyinput_Time ul li:nth-last-child(1)").remove();
+    	});	
+   
+    $("#tpolicy_Modifier_Add").click(function(){
+    			addModifier("#uc_traffic_policy");
+    });
+    $("#tmanage_Modifier_Add").click(function(){
+    			addModifier("#uc_traffic_manage");
+    });
+ 	  $("#tmark_Modifier_Add").click(function(){
+    			addModifier("#uc_traffic_mark");
+    });
+    $("#app_Modifier_Add").click(function(){
+    			addModifier("#uc_user_app");
+    });
+    $("#ipbind_Modifier_Add").click(function(){
+    			addModifier("#uc_user_ipbind");
+    });
+    $("#appbind_Modifier_Add").click(function(){
+    			addModifier("#uc_user_appbind");
+    	});
+    
+   	$("#tpolicy_Modifier_Del").click(function(){
+    			delModifier("#uc_traffic_policy");
+    });
+    $("#tmanage_Modifier_Del").click(function(){
+    			delModifier("#uc_traffic_manage");
+    });
+ 	  $("#tmark_Modifier_Del").click(function(){
+    			delModifier("#uc_traffic_mark");
+    });
+    $("#app_Modifier_Del").click(function(){
+    			delModifier("#uc_user_app");
+    });
+    $("#ipbind_Modifier_Del").click(function(){
+    			delModifier("#uc_user_ipbind");
+    });
+    $("#appbind_Modifier_Del").click(function(){
+    			delModifier("#uc_user_appbind");
+    	});	
+    if (!window.console) window.console = {};
+    if (!window.console.log) window.console.log = function() {};
+
+    $("#ucpacketform").on("submit", function() {
+        newUcpacket($(this));
+        return false;
+    });
+    $("#ucpacketform").on("keypress", function(e) {
+        if (e.keyCode == 13) {
+            newUcpacket($(this));
+            return false;
+        }
+    });
+    
+    $("#uc_packet").select();
+    //add by liudawei to handler Uc_traffic_Packet String
+    //捕获按钮动作，发送数据
+
+    $("#uc_traffic_policy").on("submit", function(e) {
+        if ($(this).checkForm(0,3)){
+            ucTrafficPacket($(this));
+        } else {
+            e.preventDefault();
+            alertDialog("uc_IP或者uc_Port不能为空");
+        }
+        return false;
+    });
+    $("#uc_traffic_manage").on("submit", function(e) {
+        if ($(this).checkForm(0,3)){
+            ucTrafficPacket($(this));
+        } else {
+            e.preventDefault();
+            alertDialog("uc_IP或者uc_Port不能为空");
+        }
+        return false;
+    });  
+    $("#uc_traffic_mark").on("submit", function(e) {
+        if ($(this).checkForm(0,3)){
+            ucTrafficPacket($(this));
+        } else {
+            e.preventDefault();
+            alertDialog("uc_IP或者uc_Port不能为空");
+        }
+        return false;
+    }); 
+    $("#uc_user_app").on("submit", function(e) {
+        if ($(this).checkForm(0,3)){
+            ucTrafficPacket($(this));
+        } else {
+            e.preventDefault();
+            alertDialog("uc_IP或者uc_Port不能为空");
+        }
+        return false;
+    });
+    $("#uc_user_ipbind").on("submit", function(e) {
+        if ($(this).checkForm(0,3)){
+            ucTrafficPacket($(this));
+        } else {
+            e.preventDefault();
+            alertDialog("uc_IP或者uc_Port不能为空");
+        }
+        return false;
+    });         
+    
+    $("#uc_user_appbind").on("submit", function(e) {
+        if ($(this).checkForm(0,3)){
+            ucTrafficPacket($(this));
+        } else {
+            e.preventDefault();
+            alertDialog("uc_IP或者uc_Port不能为空");
+        }
+        return false;
+    });
+    
+    $("#uc_admin_define").on("submit", function(e) {
+        if ($(this).checkForm(0,3)){
+            ucTrafficPacket($(this));
+        } else {
+            e.preventDefault();
+            alertDialog("uc_IP或者uc_Port不能为空");
+        }
+        return false;
+    });     
+    updater.start();
+});
+//增加Modifier
+function addModifier(selector) {
+		var upMdOptionName = $(selector).children("ul").children("li:nth-last-child(1)").children(":input").attr("name");
+		var ucMdOptionText = ''
+	
+		if (upMdOptionName.substring(1) != "_uc_Modifier_MDx") {
+					var crMdOptionName = "_uc_Modifier_MDx";
+					var crMdStepName = "_uc_Modifier_step";
+					var crMdNum = "0";
+		} else {
+					var crMdStepName = $(selector).children("ul").children("li:nth-last-child(1)").children(":input:nth-last-child(1)").attr("name").substring(1);
+					var crMdOptionName = upMdOptionName.substring(1);
+					var crMdNum = (parseInt(upMdOptionName.substring(0, 1)) + 1).toString();
+		}
+		 
+		var ucconfigNum = $(selector).children("ul").find(":input").length;
+		var ucMdOptionValue = '';
+		var ucMdOptionText = '';
+		//取得ucpacket各个字段name
+		var fields = $(selector).serializeArray()
+		for (var i = ucconfigNum; i < fields.length - 2; i++) {
+					ucMdOptionText = $(selector).find("label[for='" + fields[i].name + "']").text().substring(0, $(selector).find("label[for='" + fields[i].name + "']").text().length - 1);
+					ucMdOptionValue += '<option value="' + fields[i].name + '">' + ucMdOptionText + '</option>';
+			}
+		var md_num = ''
+		//判断是否为第一次，如果是增加“变换次数”
+		if (upMdOptionName == "uc_Random") {
+				$(selector).children("ul").append('<li><label for="uc_Modifier_count">变换次数:</label><input type="text" name="uc_Modifier_count" class="cw100 garlic-auto-save"></li>')		
+		} else {
+				$(selector).children("ul").append('<li><label>Modifier:</label><select name='+ crMdNum + crMdOptionName + ' class="cw80">' + ucMdOptionValue + '</select><label>步长:</label><input type="text" name='+ crMdNum + crMdStepName +'  class="cw40"/></li>');		
+		}
+	}
+//删除Modifier
+function delModifier(selector) {
+			var crMdOptionName = $(selector).children("ul").children("li:nth-last-child(1)").children(":input").attr("name");
+			if (crMdOptionName.substring(1) == "_uc_Modifier_MDx" ||crMdOptionName == "uc_Modifier_count" ) {
+						$(selector).children("ul").children("li:nth-last-child(1)").remove();
+			}
+	}
+//验证提示信息框
+function alertDialog(msg, width, height) {
+    var w = width || 300;
+    var h = height || 200;
+    var alertDiv = $("<div title='提示'></div>").appendTo($("BODY"));
+    var content = alertDiv.text(msg);
+    alertDiv.dialog({
+        autoOpen: true,
+        height: h,
+        width: w,
+        modal: true,
+        close: function(event, ui) {
+            alertDiv.dialog("destroy");
+            alertDiv.html("").remove();
+        }});
+}
+function newUcpacket(form) {
+    var Ucpacket = form.formToDict();
+    updater.socket.send(JSON.stringify(Ucpacket));
+    form.find("textarea[type=text]").val("").select();
+};
+
+//add by liudawei 
+//将form数据转换为json格式通过websocket发送出去
+function ucTrafficPacket(form) {
+		var ucconfigNum = form.children("ul").find(":input").length;
+    var uctraPac = form.ucPacketFormat(ucconfigNum, 7);
+    updater.socket.send(JSON.stringify(uctraPac));
+};
+
+jQuery.fn.formToDict = function() {
+    var fields = this.serializeArray();
+    var json = {}
+    for (var i = 0; i < fields.length; i++) {
+        json[fields[i].name] = fields[i].value;
+    }
+    if (json.next) delete json.next;
+    return json;
+};
+
+//将form内input和select表单变为json类型的数组
+//格式为[{"name":"form_name0","value":"form_value0"},{"name":"form_name1","value":"form_value1"}]
+//其中key name为表单的name字段，key value为表单的数据，遍历该数组
+//然后组成json格式数据返回，uc_header和uc_body数据组成一个十六进制字符串
+//add by liudawei format uc_packet to json
+jQuery.fn.ucPacketFormat = function (ucconfigNum, ucheaderNum) {
+		var fields = this.serializeArray();
+		var uc_header = new Array();
+		var uc_body = new Array();
+		var uc_header_length = 0;
+		var uc_body_length = 0;
+		var temp = new Array();
+		var json = {};
+		var json_modifier = {};
+		var json_modifier_temp = {};
+		var k = 0;
+		//uc地址配置和发包方式存入json
+		for (var i = 0; i < fields.length; i++) {
+				var patten_attr = fields[i].name.substring(fields[i].name.length-4, fields[i].name.length-1);
+				var patten_len = fields[i].name.substring(fields[i].name.length-1);
+				var fname = fields[i].name;
+				var fvalue = fields[i].value;
+				var randPatten = "";
+				var json_temp={};
+				for (var j = 0; j < parseInt(patten_len); j++) {
+						randPatten += "ff";
+				}			
+				if (i < ucconfigNum) {						
+						switch (patten_attr)
+						{
+						case "_MD":
+								if (fields[i - 1].value != ""){
+										json_temp[fname]= fvalue;
+										i++;
+										json_temp[fields[i].name] = fields[i].value;
+										json_modifier[k + "_uc_Modifier"] = json_temp;
+										json_modifier_temp[k + "uc_Modifier"] = json_temp;
+										k++;
+								}else {
+										i++;
+								}
+								break;
+						default:
+								json[fname] = fvalue; 
+						}  
+				} else if (i < ucheaderNum+ucconfigNum) { //解析uc报文的header存为16进制的字符串，python可以用decode("hex")函数来解码
+						for (var m = 0; m < Object.keys(json_modifier_temp).length; m++) {
+								if (fname == json_modifier[m + "_uc_Modifier"][m + "_uc_Modifier_MDx"]) {
+										json_modifier[m + "_uc_Modifier"][m + "_uc_Modifier_pos"] = i - ucconfigNum;
+										json_modifier[m +"_uc_Modifier"][m + "_uc_Modifier_isheader"] = "uc_header";
+										delete json_modifier_temp[m + "_uc_Modifier"];	
+								}	
+						}
+						switch (patten_attr) 
+						{
+						case "_SE":
+								if (fvalue.substring(2) != randPatten) {
+									  json_temp[fname] = fvalue.substring(2);
+								} else {
+										json_temp[fname] = randHexStr(patten_len);
+								}	
+								break;	
+						case "_NU":
+								json_temp[fname] = AddZeroToHexStr(fvalue, patten_len);
+								break;
+						case "_SQ":
+								if (fvalue.substring(2) == "00000001" ) {
+										json_temp[fname] = AddZeroToHexStr($("#uc_Header_MSeq").attr("value"), patten_len);
+										$(this).find("input[rel='MessageSeq']").attr("value",  (parseInt($("#uc_Header_MSeq").attr("value"))+1).toString());	
+								} else if (fvalue.substring(2) == randPatten) {
+										json_temp[fname] = randHexStr(patten_len); 
+								} else {
+										json_temp[fname] = "00000000";
+								}
+								break;
+						case "_LN":
+								if (fvalue != "0") {
+										json_temp[fname] = AddZeroToHexStr(fvalue, patten_len);
+								} else {//当body长度自动计算时，将该字段临时填零，后续更新
+										json_temp[fname] = "00000000";	
+								}
+								break;
+						case "_CH":
+								if (patten_len == "0") {
+										json_temp[fname] = stringToHexChrStr(fvalue);
+								} else {//方便调试，当为CH时，patten_len必须为0，不为零，发送error
+										json_temp[fname] = "error";
+								}
+								break;
+						default :
+								json[fname] = fvalue;
+						}
+						
+						uc_header.push(json_temp);
+						uc_header_length += json_temp[fname].length;
+				} else {//解析uc报文的body存为16进制的字符串，python可以用decode("hex")		
+						for (var n = 0; n < Object.keys(json_modifier_temp).length; n++) {
+								if (fname == json_modifier[n + "_uc_Modifier"][n + "_uc_Modifier_MDx"]) {
+										json_modifier[n + "_uc_Modifier"][n + "_uc_Modifier_pos"] = i - (ucconfigNum + ucheaderNum);
+										json_modifier[n + "_uc_Modifier"][n + "_uc_Modifier_isheader"] = "uc_body";
+										delete json_modifier_temp[n + "_uc_Modifier"];		
+								}	
+						}	
+						switch (patten_attr) 
+						{
+						case "_SE":			
+								if (fvalue.substring(2) != randPatten) {
+										json_temp[fname] = fvalue.substring(2);
+								} else {
+										json_temp[fname] = randHexStr(patten_len);
+								}	
+								break;
+						case "_NU":
+								json_temp[fname] = AddZeroToHexStr(fvalue, patten_len);
+								break;
+						case "_CH":
+								if (patten_len == "0") {
+										json_temp[fname] = stringToHexChrStr(fvalue);	
+								}
+								break;
+						case "_TI":
+								json_temp[fname] = UTCtoHexStr(fvalue);
+								break;
+						case "_SN":
+								json_temp[fname] = fvalue.substring(2)	
+								break;
+						case "_IP":	
+								var temp_ip = "";	
+								if (fields[i-1].value.substring(2) == "04")	{
+											temp =fvalue.split(".");
+											if (temp.length == 1 && temp[0] == "") {
+														temp = ["0","0","0"];
+												}
+											for (var k = 0; k < temp.length; k++) {
+													temp_ip += AddZeroToHexStr(temp[k], 1);	
+											}
+											json_temp[fname] = temp_ip;
+								} else if (fields[i-1].value.substring(2) == "10") {
+											temp = fvalue.split(":");
+											if (temp.length == 1 && temp[0] == "") {
+														temp = ["0000","0000","0000","0000","0000","0000","0000","0000"];
+											}
+											for (var k = 0; k < temp.length; k++) {
+												  temp_ip += temp[k];	
+											}	
+											json_temp[fname] = temp_ip;
+								}
+								break;											
+						case "_CN":
+						//此处没有根据前一个表单数据判断该表单数据长度，用于测试两者不匹配情况						
+								if (fvalue == "") {
+										fvalue = "0";	
+								}
+								json_temp[fname] = AddZeroToHexStr(fvalue, patten_len);
+								break;
+						case "_IN":
+						//此处不继续往下判断，改为按钮触发增加后续表单数据量，用于测试两者不匹配情况
+								if (fvalue == "") {
+										fvalue = "0";	
+								}
+								json_temp[fname] = AddZeroToHexStr(fvalue, patten_len);
+				    		break;
+						default:
+								json[fname] = fvalue;	
+						}
+						if (i < fields.length - 2) {
+								uc_body.push(json_temp);	
+								uc_body_length += json_temp[fname].length;
+						}
+				}
+		}
+		//增加Modifier到json
+		if (jQuery.isEmptyObject(json_modifier) == false) {
+				json["uc_Modifier"] = json_modifier;
+		}		
+		//计算uc的报文长度
+		if ($(this).find("input[name='uc_Header_MessageLen_LN4']").attr("value") == "0") {
+				var uc_MessageLen = AddZeroToHexStr(uc_body_length/2	+ (uc_header_length)/2, 4);
+				var json_temp = {};
+				uc_header[uc_header.length-1].uc_Header_MessageLen_LN4 = uc_MessageLen;
+				json["uc_header"] = uc_header;
+		} else {
+				json["uc_header"] = uc_header;
+		}
+
+    json["uc_body"] = uc_body;
+    if (json.next) delete json.next;    
+    return json;
+	}
+//add by liudawei return random toString 16
+function randHexStr(patten_len) {
+			return AddZeroToHexStr(Math.floor(Math.random()*Math.pow(16,parseInt(patten_len))), patten_len);
+	}
+//add by liudawei format UTC time toString 16
+function UTCtoHexStr (str) {
+		 var temp = new Array();
+		 var tem1 = new Array();
+		 temp = str.split(" ");
+		 temp1 = temp[0].split("/");
+		 var year = temp1[2];
+		 var month = (parseInt(temp1[0]) - 1).toString();
+		 var day = temp1[1];
+		 temp1 = temp[1].split(":");
+		 var hour = temp1[0];
+		 var minutes = temp1[1];
+		 if (year < 1970) { 
+		 		var UTCs = 0;
+		 }else {
+		 		var datnum = new Date(Date.UTC(year, month, day, hour, minutes));
+                var d = new Date();
+                var UTCs = datnum.getTime()/1000.0 + d.getTimezoneOffset()*60;
+		 }
+		 return AddZeroToHexStr(UTCs.toString(), 4);
+		 		
+};
+
+//add by liudawei 16进制数字自动高位补零,返回16进制字符串
+function AddZeroToHexStr (str, byteLen) {
+		var val="";
+		var hexstr = parseInt(str).toString(16);
+		if (str == "") {
+				hexstr = "0";
+			}
+		if (parseInt(byteLen)*2 > hexstr.length) {
+				for (var i = 0; i< parseInt(byteLen)*2 - hexstr.length; i++) {
+						val += "0";
+					}
+			}
+		val += hexstr;
+		return val;
+	};
+//add by liudawei check form input 
+jQuery.fn.checkForm = function(start, end) {
+    var fields = this.serializeArray();
+    for (var i = start; i < end; i++) {
+        if (fields[i].value == "") {
+            return false;
+        }
+    }
+    return true;
+};
+
+function stringToHexChrStr(str){
+    var val="";
+    for (var i = 0; i < str.length; i++) {
+        if (val == "") {
+            val = str.charCodeAt(i).toString(16);
+        } else if (str.charAt(i) == ".") {
+            i++;
+        } else {
+            val = val + str.charCodeAt(i).toString(16);
+        }
+    }
+    return val;
+};
+var updater = {
+    socket: null,
+
+    start: function() {
+        var url = "ws://" + location.host + "/ucsocket";
+        if ("WebSocket" in window) {
+	        updater.socket = new WebSocket(url);
+        } else {
+            updater.socket = new MozWebSocket(url);
+        }
+	updater.socket.onmessage = function(event) {
+	    updater.showMessage(JSON.parse(event.data));
+	}
+    },
+
+    showMessage: function(message) {
+        if (message.mtype == "uc_resp") {    	
+        		var uc_resp_existing = $("#m" + message.id);
+        		if (uc_resp_existing.length > 0) return;
+       		 	var node = $(message.html);
+        		node.hide();
+        		$("#uc_ack").append(node);
+        		node.slideDown();
+      	} else if (message.mtype == "ud_recv") {
+        		var ud_recv_existing = $("#d" + message.id);
+        		if (ud_recv_existing.length > 0) return;
+        		var node = $(message.html);
+        		node.hide();
+        		$("#ud_show").append(node);
+                node.slideDown();
+      	}
+    }
+};

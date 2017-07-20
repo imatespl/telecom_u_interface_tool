@@ -1,0 +1,1325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>U01 U接口测试工具</title>
+    <link rel="icon" href="{{ static_url("images/favicon.ico") }}" />
+    <link rel="stylesheet" href="{{ static_url("u01test.css") }}" type="text/css"/>
+    <link rel="stylesheet" href="{{ static_url("start/jquery-ui-1.10.2.custom.css") }}" type="text/css"/>
+    <link rel="stylesheet" href="{{ static_url("jquery-ui-timepicker-addon.css")}}" type="text/css"/>
+  </head>
+<body>
+<div id="nav_header">
+	<nav>
+		<div>
+			<h2>U01 U接口测试工具</h2>
+		</div>	
+	</nav>
+</div>	
+<div id="uc_ud_show">
+	<ul>
+		<li><a href="#uc_ack">UC响应</a></li>
+		<li><a href="#ud_show">UD数据</a></li>
+	</ul>
+<div id="uc_ack" class="dscrollauto">
+        {% for uc_resp in uc_resps %}
+          {% include "uc_resp.html" %}
+        {% end %}
+  <input type="button" value="清空" id="uc_ack_clear"/>
+</div>
+<div id="ud_show" class="dscrollauto">
+				{% for ud_recv in ud_recvs %}
+					{% include "ud_recv.html" %}
+				{% end %}
+  <input type="button" value="清空" id="ud_show_clear"/>				
+</div>
+</div>
+<div id="form_left">
+  <div id="uc_tabs">
+
+      <!---表单name最后两位用于js判断数据类型，SEx表示为Select需要继续判断随机，--->
+      <!---HIx表示input的hide表单该值x表示所占byte, CH0为字符串需要转为ASCII，NUx为数字，--->
+      <!---后面x表示数字占xByte TI0为时间,SNx表示选择表单后续表单需要根据该表单选项判断IP地址类型--->
+      <!---CNx表示为后续输入字符串长度需要判断，IN表示表单数量需要根据该选项判断，后续表单需要根据--->
+      <!---该表单判断 SQ为Message特殊字段，LN为内容长度字段, MD为modifier字段，IP为ip字段--->
+  <h3>UC流量分析结果上报</h3>	
+  <div id="uc_tab-1" class="dscrollauto">
+	<form action="/ucpacket/send" method="post" id="uc_traffic_policy" data-persist="garlic">
+    <ul>
+    <li>
+    <label for="uc_Ip">UC IP:</label>
+    <input type="text" name="uc_IP" class="cw100" />    
+    <label for="uc_Port">UC Port:</label>
+    <input type="text"  name="uc_Port" class="cw40"/>
+  	</li>
+  	<li>	
+    <label for="uc_Resend">重发方式:</label>
+    <select  name="uc_Resend">
+    		<option value="0">超时重发</option>
+    		<option value="1">定时重发</option>
+    </select>
+    <label for="uc_Timeout">时间:</label>
+    <input type="text" value="2" name="uc_Timeout" class="cw40"/>
+    <label for="uc_Count">次数:</label>
+    <input type="text" value="10" name="uc_Count" class="cw40"/>	
+    </li>
+    <li>
+    	<label for="uc_Random">随机发送:</label>
+    	<select id="uc_Random" name="uc_Random" class="cw80">
+    		 <option value="0">不随机</option>
+    		 <option value="1">ver和标示不变</option>
+    		 <option value="2">header不变</option>
+    		 <option value="3">全部随机</option>    		    		    		 
+    	</select>
+    	<label for="uc_Random_Length_min">长度范围:</label>
+      <input type="text" value="10" name="uc_Random_Length_min" class="cw40"/>
+      <label for="uc_Random_Length_max">-</label>
+      <input type="text" value="1600" name="uc_Random_Length_max" class="cw40"/>		
+    </li>
+  	</ul>
+  	<a href="#" id="tpolicy_Modifier_Add" style="margin-left:5px;">增加Modifier</a>
+  	<a href="#" id="tpolicy_Modifier_Del" style="margin-left:5px;">删除</a>   
+	  <fieldset>
+      <legend>UC Header</legend>
+      <div>
+      <label for="uc_Header_Ver_SE1">Ver:</label>
+      <select name="uc_Header_Ver_SE1">
+         <option value="\x10">ucV1</option>
+         <option value="\x20">ucV2</option>
+         <option value="\x30">ucV3</option>
+         <option value="\xff">ucV随机</option>
+      </select>
+      <label for="uc_Header_ProtoSignature_CH0">Proto Signature:</label>
+      <input id="uc_Header_ProtoSignature" name="uc_Header_ProtoSignature_CH0" value="CUC" class="cw40"/>
+    	</div>
+    	<div>	
+      <label for="uc_Header_MessageType_SE1">Message Type:</label>
+      <select id="uc_Header_MessageType" name="uc_Header_MessageType_SE1" class="cw150">
+		     <option value="\x00">通用参数设置</option>
+      	 <option value="\x01">流量分析结果上报策略</option>
+         <option value="\x02">Web类流量管理策略</option>
+         <option value="\x03">URL分类批量查询</option>
+		     <option value="\x04">URL分类批量回应 </option>
+		     <option value="\x05">VOIP类流量管理策略</option>
+		     <option value="\x06">通用流量管理策略</option>
+         <option value="\x07">通用流量标记策略</option>
+         <option value="\x08">指定应用的用户统计策略</option>
+         <option value="\x09">流量镜像策略</option>
+         <option value="\x0a">应用自定义策略</option>
+         <option value="\x40">用户组归属分配策略</option>
+         <option value="\x41">Web信息推送策略</option>
+         <option value="\x42">1ToN用户管理策略</option>
+         <option value="\x43">DDOS流量管理策略</option>
+		     <option value="\x44">DDOS保护策略对象绑定</option>
+		     <option value="\x80">AAA信息采集</option>
+       	 <option value="\x81">AAA信息下发</option>
+         <option value="\x82">静态用户信息下发</option>
+         <option value="\x83">AAA信息反查</option>
+         <option value="\x84">用户/应用策略绑定查询</option>
+         <option value="\x85">用户/应用策略信息下发</option>
+         <option value="\xc0">DPI通用信息下发</option>
+         <option value="\xc1">DPI设备心跳信息</option>
+         <option value="\xc2">DPI设备策略同步请求</option>
+         <option value="\xc3">DPI设备策略同步响应</option>
+         <option value="\xc4">DPI设备状态查询</option>
+         <option value="\xc5">DPI设备状态查询回应（静态信息）</option>
+         <option value="\xc6">DPI设备状态查询回应（动态信息）</option>
+         <option value="\xc7">协议特征库下发策略</option>
+         <option value="\xc8">URL分类库更新策略</option>
+         <option value="\xc9">应用名称对应更新通知</option>
+         <option value="\xca">IP地址库下发策略</option>
+         <option value="\xcb">广告触发网站列表定义</option>
+         <option value="\xcc">广告触发关键字列表定义</option>
+         <option value="\xcd">策略下发ACK</option>
+         <option value="\xff">随机信息类型</option>
+	    </select>
+	  	</div>
+	  	<div>
+	    <label for="uc_MessageNo_NU2">Message No.:</label>
+	    <input type="text" name="uc_MessageNo_NU2" class="cw40"/>
+	    <label for="uc_Header_MessageResv_NU1">保留(resv):</label>
+	    <input type="text" value="0"  name="uc_Header_MessageResv_NU1" class="cw40"/>
+	    </div>
+	    <div>
+	    <label for="uc_Header_MessageSeq_SQ4">Message SequenceNo.:</label>
+	    <select name="uc_Header_MessageSeq_SQ4">
+	    		<option value="\x00000000">不变</option>
+	    		<option value="\x00000001">加一</option>
+	    		<option value="\xffffffff">随机</option>
+	    </select>
+	    <input type="hidden" value="0" rel="MessageSeq"/>
+	  	</div>
+	  	<div>	
+	    <label for="uc_Header_MessageLen_LN4">MessageLen(0为自动计算):</option>
+	    <input type="text" value="0"  name="uc_Header_MessageLen_LN4" class="cw40"/>
+	    </div>
+	 </fieldset>
+   <fieldset>
+ 	 		<legend>UC Body</legend>
+ 	 		<div>
+ 	 		<label for="uc_Body_PacketType_SE1">Packet Type:</label>
+ 	 		<select  name="uc_Body_PacketType_SE1" class="cw150">
+         <option value="\x01">UD类型I数据包</option>
+         <option value="\x02">UD类型II数据包</option>
+         <option value="\xff">随机类型</option>
+      </select>
+    	</div>
+    	<div>
+      <label for="uc_Body_PacketSubtype_SE1">Packet Subtype:</label>
+      <select  name="uc_Body_PacketSubtype_SE1" class="cw150"> 
+          <option value="\x00">Web类流量统计(UD类型I)/HTTP(UD类型II)</option>
+          <option value="\x01">VoIP类流量统计(UD类型I)/RTSP(UD类型II)</option>
+          <option value="\x02">通用流量统计(UD类型I)/VoIP(UD类型II)</option>
+          <option value="\x03">访问指定应用的用户统计(UD类型I)/FTP(UD类型II)</option>
+          <option value="\x04">Download类分析功能模块(UD类型I)/SMTP(UD类型II)</option>
+          <option value="\x05">POP3(UD类型II)</option>
+          <option value="\x06">IMAP(UD类型II)</option>
+          <option value="\x07">DNS(UD类型II)</option>
+          <option value="\x80">用户偏好分析(UD类型I)</option>
+          <option value="\x81">非法路由检测分析(UD类型I)</option>
+          <option value="\x82">1ToN用户行为分析(检测结果)(UD类型I)</option>
+          <option value="\x83">1ToN用户行为分析(关键字段)(UD类型I)</option>
+          <option value="\x84">Web信息推送结果上报(UD类型I)</option>
+          <option value="\xc0">DDos流量分析功能模块(UD类型I)</option>
+          <option value="\xc1">CP/SP资源服务器分析模块(UD类型I)</option>
+          <option value="\xc2">P2P应用流量流向分析模块(UD类型I)</option>
+          <option value="\xff">随机子类型</option>
+      </select>
+    	</div>
+    	<div>
+      <label for="uc_Body_R_StartTime_TI0">开始时间(R_StartTime):</label>
+      <input type="text" id="uc_Body_R_StartTime" name="uc_Body_R_StartTime_TI0" value="00/00/0000 00:00" class="cw120"/>
+      </div>
+      <div>
+      <label for="uc_Body_R_EndTime_TI0">结束时间(R_EndTime):</label>
+      <input type="text" id="uc_Body_R_EndTime" name="uc_Body_R_EndTime_TI0" value="00/00/0000 00:00" class="cw120"/>
+      </div>
+      <div>
+      <label for="uc_Body_R_Freq_SE1">上报周期(R_Freq):</label>
+      <select  name="uc_Body_R_Freq_SE1" class="cw150">
+           <option value="\x00">流结束时即上报(UD类型II时必须为该值)</option>
+           <option value="\x01">每5分钟上报</option>
+           <option value="\x02">每1小时上报</option>
+           <option value="\x03">每3小时上报</option>
+           <option value="\x04">每天上报</option>
+       </select>
+      </div>
+      <div>
+       <label for="ud_IPtype_SN1">上报服务器IP地址(R_DestIP):</label>
+       <select id="uc_Body_R_DestIPLen" name="ud_IPtype_SN1">
+           <option value="\x04">IPv4</option>
+           <option value="\x10">IPv6</option>
+       </select>
+      </div>
+      <div>
+      	<label for="ud_IPx">IP地址:</label>
+       <input type="text"  name="ud_IPx" value="0.0.0.0" class="cw100"/>      
+       <label for="ud_Port_NU2">端口(R_DestPort):</label>
+       <input type="text"  name="ud_Port_NU2" class="cw40"/>
+       <label for="uc_Body_R_Method_SE1">上报方式(R_Method):</label>
+       <select name="uc_Body_R_Method_SE1" class="cw80">
+            <option value="\x01">Socket方式</option>
+            <option value="\x02">文件方式(UD类型I Socket/UD类型II sftp)</option>
+       </select>
+       </div>
+       </fieldset>
+	     <input type="submit" value="Submit"/>
+       <input type="hidden" name="next" value="{{ request.path }}"/>
+       {{ xsrf_form_html() }}   
+	</form>    
+  </div>
+  <h3>UC通用流量管理策略</h3>
+  <div id="uc_tab-2" class="dscrollauto">	
+	<form action="/ucpacket/send" method="post" id="uc_traffic_manage" data-persist="garlic">
+		<ul>
+		<li>
+    <label for="uc_IP">UC IP:</label>
+    <input type="text" id="uc_Ip" name="uc_IP"  class="cw100"/>
+    <label for=>UC Port:</label>
+    <input type="text" id="uc_Port" name="uc_Port" class="cw40"/>  
+    </li>
+    <li>  	
+    <label for="uc_Resend">重发方式:</label>
+    <select  name="uc_Resend">
+    		<option value="0">超时重发</option>
+    		<option value="1">定时重发</option>
+    </select>
+    <label for="uc_Timeout">时间:</label>
+    <input type="text" value="2" name="uc_Timeout" class="cw40"/>
+		<label for="uc_Count">次数:</label>
+    <input type="text" value="10" name="uc_Count" class="cw40"/>
+  	</li>
+  	<li>
+    	<label for="uc_Random">随机发送:</label>
+    	<select  name="uc_Random" class="cw80">
+    		 <option value="0">不随机</option>
+    		 <option value="1">ver和标示不变</option>
+    		 <option value="2">header不变</option>
+    		 <option value="3">全部随机</option>    		    		    		 
+    	</select>
+    	<label for="uc_Random_Length_min">长度范围:</label>
+      <input type="text" value="10" name="uc_Random_Length_min" class="cw40"/>
+      <label for="uc_Random_Length_max">-</label>
+      <input type="text" value="10" name="uc_Random_Length_max" class="cw40"/>		
+    </li>
+  	</ul>
+  	<a href="#" id="tmanage_Modifier_Add" style="margin-left:5px;">增加Modifier</a>
+  	<a href="#" id="tmanage_Modifier_Del" style="margin-left:5px;">删除</a>   		
+	  <fieldset>
+      <legend>UC Header</legend>
+      <div>
+      <label for="uc_Header_Ver_SE1">Ver:</label>
+      <select  name="uc_Header_Ver_SE1">
+         <option value="\x10">ucV1</option>
+         <option value="\x20">ucV2</option>
+         <option value="\x30">ucV3</option>
+         <option value="\xff">ucV随机</option>
+      </select>
+      <label for="uc_Header_ProtoSignature_CH0">Proto Signature:</label>
+      <input  name="uc_Header_ProtoSignature_CH0" value="CUC" class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Header_MessageType_SE1">Message Type:</label>
+      <select  name="uc_Header_MessageType_SE1" class="cw150">
+		     <option value="\x00">通用参数设置</option>
+      	 <option value="\x01">流量分析结果上报策略</option>
+         <option value="\x02">Web类流量管理策略</option>
+         <option value="\x03">URL分类批量查询</option>
+		     <option value="\x04">URL分类批量回应 </option>
+		     <option value="\x05">VOIP类流量管理策略</option>
+		     <option value="\x06">通用流量管理策略</option>
+         <option value="\x07">通用流量标记策略</option>
+         <option value="\x08">指定应用的用户统计策略</option>
+         <option value="\x09">流量镜像策略</option>
+         <option value="\x0a">应用自定义策略</option>
+         <option value="\x40">用户组归属分配策略</option>
+         <option value="\x41">Web信息推送策略</option>
+         <option value="\x42">1ToN用户管理策略</option>
+         <option value="\x43">DDOS流量管理策略</option>
+		     <option value="\x44">DDOS保护策略对象绑定</option>
+		     <option value="\x80">AAA信息采集</option>
+       	 <option value="\x81">AAA信息下发</option>
+         <option value="\x82">静态用户信息下发</option>
+         <option value="\x83">AAA信息反查</option>
+         <option value="\x84">用户/应用策略绑定查询</option>
+         <option value="\x85">用户/应用策略信息下发</option>
+         <option value="\xc0">DPI通用信息下发</option>
+         <option value="\xc1">DPI设备心跳信息</option>
+         <option value="\xc2">DPI设备策略同步请求</option>
+         <option value="\xc3">DPI设备策略同步响应</option>
+         <option value="\xc4">DPI设备状态查询</option>
+         <option value="\xc5">DPI设备状态查询回应（静态信息）</option>
+         <option value="\xc6">DPI设备状态查询回应（动态信息）</option>
+         <option value="\xc7">协议特征库下发策略</option>
+         <option value="\xc8">URL分类库更新策略</option>
+         <option value="\xc9">应用名称对应更新通知</option>
+         <option value="\xca">IP地址库下发策略</option>
+         <option value="\xcb">广告触发网站列表定义</option>
+         <option value="\xcc">广告触发关键字列表定义</option>
+         <option value="\xcd">策略下发ACK</option>
+         <option value="\xff">随机信息类型</option>
+	    </select>
+	  	</div>
+	  	<div>
+	    <label for="uc_MessageNo_NU2">Message No.:</label>
+	    <input type="text"  name="uc_MessageNo_NU2" class="cw40"/>
+	    <label for="uc_Header_MessageResv_NU1">保留(resv):</label>
+	    <input type="text" value="0"  name="uc_Header_MessageResv_NU1" class="cw40"/>
+	    </div>
+	    <div>
+	    <label for="uc_Header_MessageSeq_SQ4">Message SequenceNo.:</label>
+	    <select name="uc_Header_MessageSeq_SQ4">
+	    		<option value="\x00000000">不变</option>
+	    		<option value="\x00000001">加一</option>
+	    		<option value="\xffffffff">随机</option>
+	    </select>
+	    <input type="hidden" value="0" rel="MessageSeq"/>
+	    </div>
+	    <div>		    
+	    <label for="uc_Header_MessageLen_LN4">MessageLen(0为自动计算):</option>
+	    <input type="text" value="0" name="uc_Header_MessageLen_LN4" class="cw40"/>
+	  	</div>	
+	 </fieldset>
+   <fieldset>
+ 	 		<legend>UC Body</legend>
+ 	 		<div>
+ 	 		<label for="uc_Body_AppType_SE1">AppType:</label>
+ 	 		<select  name="uc_Body_AppType_SE1" class="cw80">
+         <option value="\x00">未识别应用</option>
+         <option value="\x01">Web视频类</option>
+         <option value="\x02">其它Web类</option>
+         <option value="\x03">P2PStream</option>
+         <option value="\x04">P2PDownload</option>
+         <option value="\x05">VideoStream</option>
+         <option value="\x06">Download</option>
+         <option value="\x07">Email</option>
+         <option value="\x08">IM</option>
+         <option value="\x09">Game</option>
+         <option value="\x0a">VoIP</option>
+         <option value="\x0b">其它</option>
+         <option value="\xff">随机</option>                           
+      </select>
+      <label for="uc_Body_AppID_SE2">AppID:</label>
+      <select name="uc_Body_AppID_SE2" class="cw80"> 
+          <option value="\x0000">未知应用</option>
+          <option value="\x0001">QQ</option>
+          <option value="\x0102">迅雷</option>
+          <option value="\x020a">优酷</option>
+          <option value="\x020b">土豆</option>
+          <option value="\x020c">酷六</option>
+          <option value="\x020d">微博</option>
+          <option value="\xffff">随机</option>
+      </select>
+    	</div>
+    	<div>
+      <label for="uc_Body_AppName_Length_CN1">应用名称长度(AppName_Length):</label>
+      <input type="text"  name="uc_Body_AppName_Length_CN1" class="cw40"/>
+      </div>
+      <div>	
+      <label for="uc_Body_AppName_CH0">应用名称(AppName):</label>
+      <input type="text"  name="uc_Body_AppName_CH0" class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Body_App_Threshold_Up_ABS_NU4">上行App流量管理门限(App_Threshold_Up_ABS):</label>
+      <input type="text"  name="uc_Body_App_Threshold_Up_ABS_NU4" class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Body_App_Threshold_Dn_ABS_NU4">下行App流量管理门限(App_Threshold_Dn_ABS):</label>
+      <input type="text" name="uc_Body_App_Threshold_Dn_ABS_NU4" class="cw40"/>
+      </div>
+      <div>
+      <label for="ud_Body_C_TimeSlot_IN1">管理时间段数(C_TimeSlot):</label>
+      <input name="ud_Body_C_TimeSlot_IN1" class="cw40"/>
+      </div>	
+      <div id="dyinput_Time">	
+      	<ul>	
+      	<li>
+      	 <label for="0_uc_Body_C_Starttime_TI0">管理起始时间(C_Starttime):</label>
+       	 <input type="text" id="0_uc_Body_C_Starttime" name="0_uc_Body_C_Starttime_TI0" value="00/00/0000 00:00" class="cw120"/>
+         </li>	
+         <li>
+         <label for="0_uc_Body_C_Stoptime_TI0">管理终止时间(C_Stoptime):</label>
+         <input type="text" id="0_uc_Body_C_Stoptime" name="0_uc_Body_C_Stoptime_TI0" value="00/00/0000 00:00" class="cw120"/>
+        </li>
+      	</ul>
+     	</div>
+       <a href="#" id="dyinput_Time_Add" style="margin-left:5px;">增加</a><a href="#" id="dyinput_Time_Del" style="margin-left:5px;">删除</a>
+       </fieldset>
+	     <input type="submit" value="Submit"/>
+       <input type="hidden" name="next" value="{{ request.path }}"/>
+       {{ xsrf_form_html() }}    
+	</form> 
+  </div>
+  <h3>UC通用流量标记策略</h3>
+  <div id="uc_tab-3" class="dscrollauto">
+	<form action="/ucpacket/send" method="post" id="uc_traffic_mark" data-persist="garlic">
+		<ul>
+		<li>
+    <label for="uc_IP">UC IP:</label>
+    <input type="text" id="uc_Ip" name="uc_IP" class="cw100"/>
+    <label for="uc_Port">UC Port:</label>
+    <input type="text" id="uc_Port" name="uc_Port" class="cw40"/>
+    </li>
+    <li>
+    <label for="uc_Resend">重发方式:</label>
+    <select  name="uc_Resend">
+    		<option value="0">超时重发</option>
+    		<option value="1">定时重发</option>
+    </select>
+    <label for="uc_Timeout">时间:</label>
+    <input type="text" value="2" name="uc_Timeout" class="cw40"/>
+    <label for="uc_Count">次数:</label>	
+    <input type="text" value="10" name="uc_Count" class="cw40"/>	
+    </li> 
+    <li>
+    	<label for="uc_Random">随机发送:</label>
+    	<select  name="uc_Random" class="cw40">
+    		 <option value="0">不随机</option>
+    		 <option value="1">ver和标示不变</option>
+    		 <option value="2">header不变</option>
+    		 <option value="3">全部随机</option>    		    		    		 
+    	</select>
+    	<label for="uc_Random_Length_min">长度范围:</label>
+      <input type="text" value="10" name="uc_Random_Length_min" class="cw40"/>
+      <label for="uc_Random_Length_max">-</label>
+      <input type="text" value="10" name="uc_Random_Length_max" class="cw40"/>		
+    </li>
+  	</ul>
+  	<a href="#" id="tmark_Modifier_Add" style="margin-left:5px;">增加Modifier</a>
+  	<a href="#" id="tmark_Modifier_Del" style="margin-left:5px;">删除</a>      	 
+	  <fieldset>
+      <legend>UC Header</legend>
+      <div>
+      <label for="uc_Header_Ver_SE1">Ver:</label>
+      <select  name="uc_Header_Ver_SE1">
+         <option value="\x10">ucV1</option>
+         <option value="\x20">ucV2</option>
+         <option value="\x30">ucV3</option>
+         <option value="\xff">ucV随机</option>
+      </select>
+      <label for="uc_Header_ProtoSignature_CH0">Proto Signature:</label>
+      <input  name="uc_Header_ProtoSignature_CH0" value="CUC" class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Header_MessageType_SE1">Message Type:</label>
+      <select name="uc_Header_MessageType_SE1" class="cw100">
+		     <option value="\x00">通用参数设置</option>
+      	 <option value="\x01">流量分析结果上报策略</option>
+         <option value="\x02">Web类流量管理策略</option>
+         <option value="\x03">URL分类批量查询</option>
+		     <option value="\x04">URL分类批量回应 </option>
+		     <option value="\x05">VOIP类流量管理策略</option>
+		     <option value="\x06">通用流量管理策略</option>
+         <option value="\x07">通用流量标记策略</option>
+         <option value="\x08">指定应用的用户统计策略</option>
+         <option value="\x09">流量镜像策略</option>
+         <option value="\x0a">应用自定义策略</option>
+         <option value="\x40">用户组归属分配策略</option>
+         <option value="\x41">Web信息推送策略</option>
+         <option value="\x42">1ToN用户管理策略</option>
+         <option value="\x43">DDOS流量管理策略</option>
+		     <option value="\x44">DDOS保护策略对象绑定</option>
+		     <option value="\x80">AAA信息采集</option>
+       	 <option value="\x81">AAA信息下发</option>
+         <option value="\x82">静态用户信息下发</option>
+         <option value="\x83">AAA信息反查</option>
+         <option value="\x84">用户/应用策略绑定查询</option>
+         <option value="\x85">用户/应用策略信息下发</option>
+         <option value="\xc0">DPI通用信息下发</option>
+         <option value="\xc1">DPI设备心跳信息</option>
+         <option value="\xc2">DPI设备策略同步请求</option>
+         <option value="\xc3">DPI设备策略同步响应</option>
+         <option value="\xc4">DPI设备状态查询</option>
+         <option value="\xc5">DPI设备状态查询回应（静态信息）</option>
+         <option value="\xc6">DPI设备状态查询回应（动态信息）</option>
+         <option value="\xc7">协议特征库下发策略</option>
+         <option value="\xc8">URL分类库更新策略</option>
+         <option value="\xc9">应用名称对应更新通知</option>
+         <option value="\xca">IP地址库下发策略</option>
+         <option value="\xcb">广告触发网站列表定义</option>
+         <option value="\xcc">广告触发关键字列表定义</option>
+         <option value="\xcd">策略下发ACK</option>
+         <option value="\xff">随机信息类型</option>
+	    </select>
+	    </div>
+	    <div>
+	    <label for="uc_MessageNo_NU2">Message No.:</label>
+	    <input type="text" name="uc_MessageNo_NU2" class="cw40"/>
+	    <label for="uc_Header_MessageResv_NU1">保留(resv):</label>
+	    <input type="text" value="0"  name="uc_Header_MessageResv_NU1" class="cw40"/>
+	    </div>
+	    <div>
+	    <label for="uc_Header_MessageSeq_SQ4">Message SequenceNo.:</label>
+	    <select name="uc_Header_MessageSeq_SQ4">
+	    		<option value="\x00000000">不变</option>
+	    		<option value="\x00000001">加一</option>
+	    		<option value="\xffffffff">随机</option>
+	    </select>
+	    <input type="hidden" value="0" id="uc_Header_MSeq"/>
+	    </div>
+	    <div>
+	    <label for="uc_Header_MessageLen_LN4">MessageLen(0为自动计算):</option>
+	    <input type="text" value="0"  name="uc_Header_MessageLen_LN4" class="cw40"/>
+	    </div>
+	 </fieldset>
+   <fieldset>
+ 	 		<legend>UC Body</legend>
+ 	 		<div>
+ 	 		<label for="uc_Body_AppType_SE1">AppType:</label>
+ 	 		<select  name="uc_Body_AppType_SE1" class="cw80">
+         <option value="\x00">未识别应用</option>
+         <option value="\x01">Web视频类</option>
+         <option value="\x02">其它Web类</option>
+         <option value="\x03">P2PStream</option>
+         <option value="\x04">P2PDownload</option>
+         <option value="\x05">VideoStream</option>
+         <option value="\x06">Download</option>
+         <option value="\x07">Email</option>
+         <option value="\x08">IM</option>
+         <option value="\x09">Game</option>
+         <option value="\x0a">VoIP</option>
+         <option value="\x0b">其它</option>
+         <option value="\xff">随机</option>                           
+      </select>
+      <label for="uc_Body_AppID_SE2">AppID:</label>
+      <select  name="uc_Body_AppID_SE2" class="cw80"> 
+          <option value="\x0000">未知应用</option>
+          <option value="\x0001">QQ</option>
+          <option value="\x0102">迅雷</option>
+          <option value="\x020a">优酷</option>
+          <option value="\x020b">土豆</option>
+          <option value="\x020c">酷六</option>
+          <option value="\x020d">微博</option>
+          <option value="\xffff">随机</option>
+      </select>
+    	</div>
+    	<div>
+      <label for="uc_Body_AppName_Length_CN1">应用名称长度(AppName_Length):</label>
+      <input type="text"  name="uc_Body_AppName_Length_CN1" class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Body_AppName_CH0">应用名称(AppName):</label>
+      <input type="text"  name="uc_Body_AppName_CH0" class="cw80"/>
+      </div>
+      <div>
+      <label for="uc_Body_Qos_Label_Up_NU1">应用上行流量差异化标记值(Qos_Label_Up):</label>
+      <input type="text"  name="uc_Body_Qos_Label_Up_NU1"  class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Body_Qos_Label_Dn_NU1">应用下行流量差异化标记值(Qos_Label_Dn):</label>
+      <input type="text" name="uc_Body_Qos_Label_Dn_NU1" class="cw40"/>
+      </div>
+      </fieldset> 
+	     <input type="submit" value="Submit"/>
+       <input type="hidden" name="next" value="{{ request.path }}"/>
+       {{ xsrf_form_html() }}
+    
+	</form>	
+  </div>
+  <h3>UC指定应用用户统计</h3>  
+  <div id="uc_tab-4" class="dscrollauto">
+	<form action="/ucpacket/send" method="post" id="uc_user_app" data-persist="garlic">
+		<ul>
+		<li>
+    <label for="uc_IP">UC IP:</label>
+    <input type="text" id="uc_Ip" name="uc_IP" class="cw100"/>
+    <label for="uc_Port">UC Port:</label>
+    <input type="text" id="uc_Port" name="uc_Port" class="cw40"/>
+    </li>
+    <li>
+    <label for="uc_Resend">重发方式:</label>
+    <select  name="uc_Resend">
+    		<option value="0">超时重发</option>
+    		<option value="1">定时重发</option>
+    </select>
+    <label for="uc_Timeout">时间:</label>
+    <input type="text" value="2" name="uc_Timeout" class="cw40"/>
+    <label for="uc_Count">次数:</label>	
+    <input type="text" value="10" name="uc_Count" class="cw40"/>
+    </li>
+    <li>
+    	<label for="uc_Random">随机发送:</label>
+    	<select  name="uc_Random" class="cw40">
+    		 <option value="0">不随机</option>
+    		 <option value="1">ver和标示不变</option>
+    		 <option value="2">header不变</option>
+    		 <option value="3">全部随机</option>    		    		    		 
+    	</select>
+    	<label for="uc_Random_Length_min">长度范围:</label>
+      <input type="text" value="10" name="uc_Random_Length_min" class="cw40"/>
+      <label for="uc_Random_Length_max">-</label>
+      <input type="text" value="10" name="uc_Random_Length_max" class="cw40"/>		
+    </li>
+  	</ul>
+  	<a href="#" id="app_Modifier_Add" style="margin-left:5px;">增加Modifier</a>
+  	<a href="#" id="app_Modifier_Del" style="margin-left:5px;">删除</a>      	
+	  <fieldset>
+      <legend>UC Header</legend>
+      <div>
+      <label for="uc_Header_Ver_SE1">Ver:</label>
+      <select name="uc_Header_Ver_SE1">
+         <option value="\x10">ucV1</option>
+         <option value="\x20">ucV2</option>
+         <option value="\x30">ucV3</option>
+         <option value="\xff">ucV随机</option>
+      </select>
+      <label for="uc_Header_ProtoSignature_CH0">Proto Signature:</label>
+      <input  name="uc_Header_ProtoSignature_CH0" value="CUC" class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Header_MessageType_SE1">Message Type:</label>
+      <select  name="uc_Header_MessageType_SE1" class="cw100">
+		     <option value="\x00">通用参数设置</option>
+      	 <option value="\x01">流量分析结果上报策略</option>
+         <option value="\x02">Web类流量管理策略</option>
+         <option value="\x03">URL分类批量查询</option>
+		     <option value="\x04">URL分类批量回应 </option>
+		     <option value="\x05">VOIP类流量管理策略</option>
+		     <option value="\x06">通用流量管理策略</option>
+         <option value="\x07">通用流量标记策略</option>
+         <option value="\x08">指定应用的用户统计策略</option>
+         <option value="\x09">流量镜像策略</option>
+         <option value="\x0a">应用自定义策略</option>
+         <option value="\x40">用户组归属分配策略</option>
+         <option value="\x41">Web信息推送策略</option>
+         <option value="\x42">1ToN用户管理策略</option>
+         <option value="\x43">DDOS流量管理策略</option>
+		     <option value="\x44">DDOS保护策略对象绑定</option>
+		     <option value="\x80">AAA信息采集</option>
+       	 <option value="\x81">AAA信息下发</option>
+         <option value="\x82">静态用户信息下发</option>
+         <option value="\x83">AAA信息反查</option>
+         <option value="\x84">用户/应用策略绑定查询</option>
+         <option value="\x85">用户/应用策略信息下发</option>
+         <option value="\xc0">DPI通用信息下发</option>
+         <option value="\xc1">DPI设备心跳信息</option>
+         <option value="\xc2">DPI设备策略同步请求</option>
+         <option value="\xc3">DPI设备策略同步响应</option>
+         <option value="\xc4">DPI设备状态查询</option>
+         <option value="\xc5">DPI设备状态查询回应（静态信息）</option>
+         <option value="\xc6">DPI设备状态查询回应（动态信息）</option>
+         <option value="\xc7">协议特征库下发策略</option>
+         <option value="\xc8">URL分类库更新策略</option>
+         <option value="\xc9">应用名称对应更新通知</option>
+         <option value="\xca">IP地址库下发策略</option>
+         <option value="\xcb">广告触发网站列表定义</option>
+         <option value="\xcc">广告触发关键字列表定义</option>
+         <option value="\xcd">策略下发ACK</option>
+         <option value="\xff">随机信息类型</option>
+	    </select>
+	  	</div>
+	  	<div>
+	    <label for="uc_MessageNo_NU2">Message No.:</label>
+	    <input type="text"  name="uc_MessageNo_NU2" class="cw40"/>
+	    <label for="uc_Header_MessageResv_NU1">保留(resv):</label>
+	    <input type="text" value="0"  name="uc_Header_MessageResv_NU1" class="cw40"/>
+	    </div>
+	    <div>
+	    <label for="uc_Header_MessageSeq_SQ4">Message SequenceNo.:</label>
+	    <select  name="uc_Header_MessageSeq_SQ4">
+	    		<option value="\x00000000">不变</option>
+	    		<option value="\x00000001">加一</option>
+	    		<option value="\xffffffff">随机</option>
+	    </select>
+	    <input type="hidden" value="0" rel="MessageSeq"/>
+	  	</div>
+	  	<div>	
+	    <label for="uc_Header_MessageLen_LN4">MessageLen(0为自动计算):</option>
+	    <input type="text" value="0"  name="uc_Header_MessageLen_LN4" class="cw40"/>
+	    </div>
+	 </fieldset>
+   <fieldset>
+ 	 		<legend>UC Body</legend>
+ 	 		<div>
+ 	 		<label for="uc_Body_R_StartTime_TI0">统计开始时间(R_StartTime):</label>
+ 	 		<input type="text" id="uc_Body_R_StartTime1" name="uc_Body_R_StartTime_TI0" value="00/00/0000 00:00" class="cw120"/>
+ 	 		</div>
+ 	 		<div>
+ 	 		<label for="uc_Body_R_EndTime_TI0">统计结束时间(R_EndTime):</label>
+ 	 		<input type="text" id="uc_Body_R_EndTime1" name="uc_Body_R_EndTime_TI0" value="00/00/0000 00:00" class="cw120"/>
+ 	 		</div>
+ 	 		<div>
+ 	 		<label for="uc_Body_AppType_SE1">AppType:</label>
+ 	 		<select  name="uc_Body_AppType_SE1" class="cw80">
+         <option value="\x00">未识别应用</option>
+         <option value="\x01">Web视频类</option>
+         <option value="\x02">其它Web类</option>
+         <option value="\x03">P2PStream</option>
+         <option value="\x04">P2PDownload</option>
+         <option value="\x05">VideoStream</option>
+         <option value="\x06">Download</option>
+         <option value="\x07">Email</option>
+         <option value="\x08">IM</option>
+         <option value="\x09">Game</option>
+         <option value="\x0a">VoIP</option>
+         <option value="\x0b">其它</option>
+         <option value="\xff">随机</option>                           
+      </select>
+      <label for="uc_Body_AppID_SE2">AppID:</label>
+      <select  name="uc_Body_AppID_SE2" class="cw80"> 
+          <option value="\x0000">未知应用</option>
+          <option value="\x0001">QQ</option>
+          <option value="\x0102">迅雷</option>
+          <option value="\x020a">优酷</option>
+          <option value="\x020b">土豆</option>
+          <option value="\x020c">酷六</option>
+          <option value="\x020d">微博</option>
+          <option value="\xffff">随机</option>
+      </select>
+    	</div>
+    	<div>
+      <label for="uc_Body_AppName_Length_IN1">应用名称长度(AppName_Length):</label>
+      <input type="text" name="uc_Body_AppName_Length_IN1" class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Body_AppName_CH0">应用名称(AppName):</label>
+      <input type="text"  name="uc_Body_AppName_CH0" class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Body_UserType_SE1">统计用户类型(UserType):</label>
+      <select  name="uc_Body_UserType_SE1" class="cw80">
+      		<option value="\x00">所有用户</option>
+      		<option value="\x01">账户用户</option>
+      		<option value="\x02">静态IP地址用户</option>
+      		<option value="\x03">组用户</option>
+      </select>
+   	  </div>
+   	  </fieldset> 
+	     <input type="submit" value="Submit"/>
+       <input type="hidden" name="next" value="{{ request.path }}"/>
+       {{ xsrf_form_html() }}
+    
+	</form>	
+  </div>
+  <h3>UC用户IP地址绑定</h3>
+  <div id="uc_tab-5" class="dscrollauto">
+	<form action="/ucpacket/send" method="post" id="uc_user_ipbind" data-persist="garlic">
+		<ul>
+		<li>
+    <label for="uc_Ip">UC IP:</label>
+    <input type="text" id="uc_Ip" name="uc_IP" class="cw100"/>
+    <label for="uc_Port">UC Port:</label>
+    <input type="text" id="uc_Port" name="uc_Port" class="cw40"/>
+    </li>
+    <li>
+    <label for="uc_Resend">重发方式:</label>
+    <select  name="uc_Resend">
+    		<option value="0">超时重发</option>
+    		<option value="1">定时重发</option>
+    </select>
+    <label for="uc_Timeout">时间:</label>
+    <input type="text" value="2" name="uc_Timeout" class="cw40"/>
+    <label for="uc_Count">次数:</label>	
+    <input type="text" value="10" name="uc_Count" class="cw40"/>
+    </li> 
+    <li>
+    	<label for="uc_Random">随机发送:</label>
+    	<select  name="uc_Random" class="cw80">
+    		 <option value="0">不随机</option>
+    		 <option value="1">ver和标示不变</option>
+    		 <option value="2">header不变</option>
+    		 <option value="3">全部随机</option>    		    		    		 
+    	</select>
+    	<label for="uc_Random_Length_min">长度范围:</label>
+      <input type="text" value="10" name="uc_Random_Length_min" class="cw40"/>
+      <label for="uc_Random_Length_max">-</label>
+      <input type="text" value="10" name="uc_Random_Length_max" class="cw40"/>		
+    </li>
+  	</ul>
+  	<a href="#" id="ipbind_Modifier_Add" style="margin-left:5px;">增加Modifier</a>
+  	<a href="#" id="ipbind_Modifier_Del" style="margin-left:5px;">删除</a>   	
+	  <fieldset>
+      <legend>UC Header</legend>
+      <div>
+      <label for="uc_Header_Ver_SE1">Ver:</label>
+      <select  name="uc_Header_Ver_SE1">
+         <option value="\x10">ucV1</option>
+         <option value="\x20">ucV2</option>
+         <option value="\x30">ucV3</option>
+         <option value="\xff">ucV随机</option>
+      </select>
+      <label for="uc_Header_ProtoSignature_CH0">Proto Signature:</label>
+      <input  name="uc_Header_ProtoSignature_CH0" value="CUC" class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Header_MessageType_SE1">Message Type:</label>
+      <select  name="uc_Header_MessageType_SE1" class="cw100">
+		     <option value="\x00">通用参数设置</option>
+      	 <option value="\x01">流量分析结果上报策略</option>
+         <option value="\x02">Web类流量管理策略</option>
+         <option value="\x03">URL分类批量查询</option>
+		     <option value="\x04">URL分类批量回应 </option>
+		     <option value="\x05">VOIP类流量管理策略</option>
+		     <option value="\x06">通用流量管理策略</option>
+         <option value="\x07">通用流量标记策略</option>
+         <option value="\x08">指定应用的用户统计策略</option>
+         <option value="\x09">流量镜像策略</option>
+         <option value="\x0a">应用自定义策略</option>
+         <option value="\x40">用户组归属分配策略</option>
+         <option value="\x41">Web信息推送策略</option>
+         <option value="\x42">1ToN用户管理策略</option>
+         <option value="\x43">DDOS流量管理策略</option>
+		     <option value="\x44">DDOS保护策略对象绑定</option>
+		     <option value="\x80">AAA信息采集</option>
+       	 <option value="\x81">AAA信息下发</option>
+         <option value="\x82">静态用户信息下发</option>
+         <option value="\x83">AAA信息反查</option>
+         <option value="\x84">用户/应用策略绑定查询</option>
+         <option value="\x85">用户/应用策略信息下发</option>
+         <option value="\xc0">DPI通用信息下发</option>
+         <option value="\xc1">DPI设备心跳信息</option>
+         <option value="\xc2">DPI设备策略同步请求</option>
+         <option value="\xc3">DPI设备策略同步响应</option>
+         <option value="\xc4">DPI设备状态查询</option>
+         <option value="\xc5">DPI设备状态查询回应（静态信息）</option>
+         <option value="\xc6">DPI设备状态查询回应（动态信息）</option>
+         <option value="\xc7">协议特征库下发策略</option>
+         <option value="\xc8">URL分类库更新策略</option>
+         <option value="\xc9">应用名称对应更新通知</option>
+         <option value="\xca">IP地址库下发策略</option>
+         <option value="\xcb">广告触发网站列表定义</option>
+         <option value="\xcc">广告触发关键字列表定义</option>
+         <option value="\xcd">策略下发ACK</option>
+         <option value="\xff">随机信息类型</option>
+	    </select>
+	  	</div>
+	  	<div>
+	    <label for="uc_MessageNo_NU2">Message No.:</label>
+	    <input type="text"  name="uc_MessageNo_NU2" class="cw40"/>
+	    <label for="uc_Header_MessageResv_NU1">保留(resv):</label>
+	    <input type="text" value="0"  name="uc_Header_MessageResv_NU1" class="cw40"/>
+	    </div>
+	    <div>
+	    <label for="uc_Header_MessageSeq_SQ4">Message SequenceNo.:</label>
+	    <select  name="uc_Header_MessageSeq_SQ4">
+	    		<option value="\x00000000">不变</option>
+	    		<option value="\x00000001">加一</option>
+	    		<option value="\xffffffff">随机</option>
+	    </select>
+	    <input type="hidden" value="0" rel="MessageSeq" class="cw40"/>
+	    </div>
+	    <div>
+	    <label for="uc_Header_MessageLen_LN4">MessageLen(0为自动计算):</option>
+	    <input type="text" value="0" name="uc_Header_MessageLen_LN4" class="cw40"/>
+	    </div>
+	 </fieldset>
+   <fieldset>
+ 	 		<legend>UC Body</legend>
+ 	 		<div>
+ 	 		<label for="uc_Body_Bind_Action_SE1">Bind_Action:</label>
+ 	 		<select name="uc_Body_Bind_Action_SE1" class="cw100">
+ 	 				<option value="\x01">账号与地址绑定</option>
+ 	 				<option value="\x02">账户与地址解绑定</option>
+ 	 		</select>
+ 	 		</div>
+ 	 		<div>
+      <label for="uc_Body_UserNameLength_CN1">用户账号长度(UserNameLength):</label>
+      <input type="text" name="uc_Body_UserNameLength_CN1" class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Body_UserName_CH0">账号名称(UserName):</label>
+      <input type="text" name="uc_Body_UserName_CH0" class="cw80"/>
+      </div>
+      <div>
+      <label for="uc_Body_IP_SegmentNum_IN2">用户地址段数(IP_SegmentNum):</label>
+      <input type="text" name="uc_Body_IP_SegmentNum_IN2" class="cw40"/>
+      </div>
+      <div id="dyinput_IP">
+      <div>	
+      	<ul>
+      	<li>
+      	<label for="uc_Body_UserIPLength_SN1">IP地址长度(UserIPLength):</label>
+      	<select name="uc_Body_UserIPLength_SN1">
+      		<option value="\x04">IPv4</option>
+      		<option value="\x10">IPv6</option>
+      	</select>
+        </li>
+        <li>
+      	<label for="uc_Body_UserIP_IPx">IP地址(UserIP):</label>
+      	<input type="text"  name="uc_Body_UserIP_IPx" value="0.0.0.0" class="cw100"/>
+      	<label for="uc_Body_UserIP_Prefix_NU1">IP地址前缀(UserIP_Prefix):</label>
+      	<input type="text" name="uc_Body_UserIP_Prefix_NU1" class="cw40"/>
+      	</li>
+      </ul>
+    	</div>
+    	</div>
+    	<a href="#" id="dyinput_IP_Add" style="margin-left:5px;">增加</a><a href="#" id="dyinput_IP_Del" style="margin-left:5px;">删除</a>
+    	</fieldset>
+       <input type="submit" value="Submit"/>
+       <input type="hidden" name="next" value="{{ request.path }}"/>
+       {{ xsrf_form_html() }}
+ 
+	</form>	  	
+  </div>
+  <h3>UC用户应用绑定</h3>
+  <div id="uc_tab-6" class="dscrollauto">
+	<form action="/ucpacket/send" method="post" id="uc_user_appbind" data-persist="garlic">
+		<ul>
+		<li>
+    <label for="uc_IP">UC IP:</label>
+    <input type="text" id="uc_Ip" name="uc_IP" class="cw100"/>
+    <label for="uc_Port">UC Port:</label>
+    <input type="text" id="uc_Port" name="uc_Port" class="cw40"/>
+    </li>
+    <li>
+    <label for="uc_Resend">重发方式:</label>
+    <select name="uc_Resend">
+    		<option value="0">超时重发</option>
+    		<option value="1">定时重发</option>
+    </select>
+    <label for="uc_Timeout">时间:</label>
+    <input type="text" value="2" name="uc_Timeout" class="cw40"/>
+    <label for="uc_Count">次数:</label>	
+    <input type="text" value="10" name="uc_Count" class="cw40"/>   
+    </li> 
+  	<li>
+    	<label for="uc_Random">随机发送:</label>
+    	<select  name="uc_Random" class="cw80">
+    		 <option value="0">不随机</option>
+    		 <option value="1">ver和标示不变</option>
+    		 <option value="2">header不变</option>
+    		 <option value="3">全部随机</option>    		    		    		 
+    	</select>
+    	<label for="uc_Random_Length_min">长度范围:</label>
+      <input type="text" value="10" name="uc_Random_Length_min" class="cw40"/>
+      <label for="uc_Random_Length_max">-</label>
+      <input type="text" value="10" name="uc_Random_Length_max" class="cw40"/>		
+    </li>
+  	</ul>
+  	<a href="#" id="appbind_Modifier_Add" style="margin-left:5px;">增加Modifier</a>
+  	<a href="#" id="appbind_Modifier_Del" style="margin-left:5px;">删除</a>   	
+	  <fieldset>
+      <legend>UC Header</legend>
+      <div>
+      <label for="uc_Header_Ver_SE1">Ver:</label>
+      <select name="uc_Header_Ver_SE1">
+         <option value="\x10">ucV1</option>
+         <option value="\x20">ucV2</option>
+         <option value="\x30">ucV3</option>
+         <option value="\xff">ucV随机</option>
+      </select>
+      <label for="uc_Header_ProtoSignature_CH0">Proto Signature:</label>
+      <input  name="uc_Header_ProtoSignature_CH0" value="CUC" class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Header_MessageType_SE1">Message Type:</label>
+      <select  name="uc_Header_MessageType_SE1" class="cw100">
+		     <option value="\x00">通用参数设置</option>
+      	 <option value="\x01">流量分析结果上报策略</option>
+         <option value="\x02">Web类流量管理策略</option>
+         <option value="\x03">URL分类批量查询</option>
+		     <option value="\x04">URL分类批量回应 </option>
+		     <option value="\x05">VOIP类流量管理策略</option>
+		     <option value="\x06">通用流量管理策略</option>
+         <option value="\x07">通用流量标记策略</option>
+         <option value="\x08">指定应用的用户统计策略</option>
+         <option value="\x09">流量镜像策略</option>
+         <option value="\x0a">应用自定义策略</option>
+         <option value="\x40">用户组归属分配策略</option>
+         <option value="\x41">Web信息推送策略</option>
+         <option value="\x42">1ToN用户管理策略</option>
+         <option value="\x43">DDOS流量管理策略</option>
+		     <option value="\x44">DDOS保护策略对象绑定</option>
+		     <option value="\x80">AAA信息采集</option>
+       	 <option value="\x81">AAA信息下发</option>
+         <option value="\x82">静态用户信息下发</option>
+         <option value="\x83">AAA信息反查</option>
+         <option value="\x84">用户/应用策略绑定查询</option>
+         <option value="\x85">用户/应用策略信息下发</option>
+         <option value="\xc0">DPI通用信息下发</option>
+         <option value="\xc1">DPI设备心跳信息</option>
+         <option value="\xc2">DPI设备策略同步请求</option>
+         <option value="\xc3">DPI设备策略同步响应</option>
+         <option value="\xc4">DPI设备状态查询</option>
+         <option value="\xc5">DPI设备状态查询回应（静态信息）</option>
+         <option value="\xc6">DPI设备状态查询回应（动态信息）</option>
+         <option value="\xc7">协议特征库下发策略</option>
+         <option value="\xc8">URL分类库更新策略</option>
+         <option value="\xc9">应用名称对应更新通知</option>
+         <option value="\xca">IP地址库下发策略</option>
+         <option value="\xcb">广告触发网站列表定义</option>
+         <option value="\xcc">广告触发关键字列表定义</option>
+         <option value="\xcd">策略下发ACK</option>
+         <option value="\xff">随机信息类型</option>
+	    </select>
+	  	</div>
+	  	<div>
+	    <label for="uc_MessageNo_NU2">Message No.:</label>
+	    <input type="text" name="uc_MessageNo_NU2" class="cw40"/>
+	    <label for="uc_Header_MessageResv_NU1">保留(resv):</label>
+	    <input type="text" value="0" name="uc_Header_MessageResv_NU1" class="cw40"/>
+	    </div>
+	    <div>
+	    <label for="uc_Header_MessageSeq_SQ4">Message SequenceNo.:</label>
+	    <select name="uc_Header_MessageSeq_SQ4">
+	    		<option value="\x00000000">不变</option>
+	    		<option value="\x00000001">加一</option>
+	    		<option value="\xffffffff">随机</option>
+	    </select>
+	    <input type="hidden" value="0" rel="MessageSeq"/>
+	    </div>
+	    <div>
+	    <label for="uc_Header_MessageLen_LN4">MessageLen(0为自动计算):</option>
+	    <input type="text" value="0" name="uc_Header_MessageLen_LN4" class="cw40"/>
+	    </div>
+	 </fieldset>
+   <fieldset>
+ 	 		<legend>UC Body</legend>
+ 	 		<div>
+ 	 		<label for="uc_Body_Bind_Action_SE1">Bind_Action:</label>
+ 	 		<select name="uc_Body_Bind_Action_SE1" class="cw80">
+ 	 				<option value="\x01">账号/应用绑定</option>
+ 	 				<option value="\x02">账户/应用解绑定</option>
+ 	 		</select>
+ 	 		<label for="uc_Body_UserType_SE1">用户类型(UserType):</label>
+ 	 		<select name="uc_Body_UserType_SE1" class="cw80">
+ 	 				<option value="\x00">全局策略</option>
+ 	 				<option value="\x01">账号用户</option>
+ 	 				<option value="\x02">IP地址用户</option>
+ 	 				<option value="\x03">组用户</option>
+ 	 		</select>
+ 	 		</div>
+ 	 		<div>
+      <label for="uc_Body_UserNameLength_CN1">用户账号长度(UserNameLength):</label>
+      <input type="text" name="uc_Body_UserNameLength_CN1" class="cw40"/>
+      </div>
+      <div>
+      <label for="uc_Body_UserName_CH0">账号名称(UserName):</label>
+      <input type="text" name="uc_Body_UserName_CH0" class="cw80"/>
+      </div>
+      <div>
+      <label for="uc_Body_MessageNum_IN2">用户待绑定策略数(MessageNum):</label>
+      <input type="text" name="uc_Body_MessageNum_IN2" class="cw40"/>
+      </div>
+      <div id="dyinput_Message">
+      	<div>
+      		<ul>
+      		<li>
+      	<label for="uc_Body_MessageType_SE1">策略类型(MessageType):</label>
+      	<select name="uc_Body_MessageType_SE1" class="cw100">
+		     <option value="\x00">通用参数设置</option>
+      	 <option value="\x01">流量分析结果上报策略</option>
+         <option value="\x02">Web类流量管理策略</option>
+         <option value="\x03">URL分类批量查询</option>
+		     <option value="\x04">URL分类批量回应 </option>
+		     <option value="\x05">VOIP类流量管理策略</option>
+		     <option value="\x06">通用流量管理策略</option>
+         <option value="\x07">通用流量标记策略</option>
+         <option value="\x08">指定应用的用户统计策略</option>
+         <option value="\x09">流量镜像策略</option>
+         <option value="\x0a">应用自定义策略</option>
+         <option value="\x40">用户组归属分配策略</option>
+         <option value="\x41">Web信息推送策略</option>
+         <option value="\x42">1ToN用户管理策略</option>
+         <option value="\x43">DDOS流量管理策略</option>
+		     <option value="\x44">DDOS保护策略对象绑定</option>
+		     <option value="\x80">AAA信息采集</option>
+       	 <option value="\x81">AAA信息下发</option>
+         <option value="\x82">静态用户信息下发</option>
+         <option value="\x83">AAA信息反查</option>
+         <option value="\x84">用户/应用策略绑定查询</option>
+         <option value="\x85">用户/应用策略信息下发</option>
+         <option value="\xc0">DPI通用信息下发</option>
+         <option value="\xc1">DPI设备心跳信息</option>
+         <option value="\xc2">DPI设备策略同步请求</option>
+         <option value="\xc3">DPI设备策略同步响应</option>
+         <option value="\xc4">DPI设备状态查询</option>
+         <option value="\xc5">DPI设备状态查询回应（静态信息）</option>
+         <option value="\xc6">DPI设备状态查询回应（动态信息）</option>
+         <option value="\xc7">协议特征库下发策略</option>
+         <option value="\xc8">URL分类库更新策略</option>
+         <option value="\xc9">应用名称对应更新通知</option>
+         <option value="\xca">IP地址库下发策略</option>
+         <option value="\xcb">广告触发网站列表定义</option>
+         <option value="\xcc">广告触发关键字列表定义</option>
+         <option value="\xcd">策略下发ACK</option>
+         <option value="\xff">随机信息类型</option>
+	    	</select>
+	    	</li>
+	    	<li>
+	    	<label for="uc_Body_MessageNo_NU2">策略号(Message No.):</label>
+	    	<input type="text" name="uc_Body_MessageNo_NU2" class="cw40"/>
+	    	</li>
+	    </ul>
+	  	</div>
+	  	</div>
+	  	<a href="#" id="dyinput_Message_Add" style="margin-left:5px;">增加</a><a href="#" id="dyinput_Message_Del" style="margin-left:5px;">删除</a>
+	    </fieldset> 
+	     <input type="submit" value="Submit"/>
+       <input type="hidden" name="next" value="{{ request.path }}"/>
+       {{ xsrf_form_html() }}
+ 
+	</form>	  	
+  </div>
+  <h3>UC自定义数据</h3>
+  <div id="uc_tab-7" class="dscrollauto">
+  <form action="/ucpacket/send" method="post" id="uc_admin_define" data-persist="garlic">
+  	<ul>
+  	<li>
+    <label for="uc_IP">UC IP:</label>
+    <input type="text" id="uc_Ip" name="uc_IP" class="cw100"/>
+    <label for="uc_Port">UC Port:</label>
+    <input type="text" id="uc_Port" name="uc_Port" class="cw40"/>
+    </li>
+    <li>
+    <label for="uc_Resend">重发方式:</label>
+    <select name="uc_Resend">
+    		<option value="0">超时重发</option>
+    		<option value="1">定时重发</option>
+    </select>
+    <label for="uc_Timeout">时间:</label>
+    <input type="text" value="2" name="uc_Timeout" class="cw40"/>
+    <label for="uc_Count">次数:</label>	
+    <input type="text" value="10" name="uc_Count" class="cw40"/> 
+    </li> 
+    <li>
+    	<label for="uc_Random">随机发送:</label>
+    	<select name="uc_Random" class="cw80">
+    		 <option value="0">不随机</option>
+    		 <option value="1">ver和标示不变</option>
+    		 <option value="2">header不变</option>
+    		 <option value="3">全部随机</option>    		    		    		 
+    	</select>
+    	<label for="uc_Random_Length_min">长度范围:</label>
+      <input type="text" value="10" name="uc_Random_Length_min" class="cw40"/>
+      <label for="uc_Random_Length_max">-</label>	
+      <input type="text" value="10" name="uc_Random_Length_max" class="cw40"/>		
+    </li>
+  	</ul>  	
+	  <fieldset>
+      <legend>UC Header</legend>
+      <div>
+      <label for="uc_Header_Ver_SE1">Ver:</label>
+      <select name="uc_Header_Ver_SE1">
+         <option value="\x10">ucV1</option>
+         <option value="\x20">ucV2</option>
+         <option value="\x30">ucV3</option>
+         <option value="\xff">ucV随机</option>
+      </select>
+      <label for="uc_Header_ProtoSignature_CH0">Proto Signature:</label>
+      <input name="uc_Header_ProtoSignature_CH0" value="CUC" class="cw40"/>
+      </div>
+    	<div>
+      <label for="uc_Header_MessageType_SE1">Message Type:</label>
+      <select  name="uc_Header_MessageType_SE1" class="cw100">
+		     <option value="\x00">通用参数设置</option>
+      	 <option value="\x01">流量分析结果上报策略</option>
+         <option value="\x02">Web类流量管理策略</option>
+         <option value="\x03">URL分类批量查询</option>
+		     <option value="\x04">URL分类批量回应 </option>
+		     <option value="\x05">VOIP类流量管理策略</option>
+		     <option value="\x06">通用流量管理策略</option>
+         <option value="\x07">通用流量标记策略</option>
+         <option value="\x08">指定应用的用户统计策略</option>
+         <option value="\x09">流量镜像策略</option>
+         <option value="\x0a">应用自定义策略</option>
+         <option value="\x40">用户组归属分配策略</option>
+         <option value="\x41">Web信息推送策略</option>
+         <option value="\x42">1ToN用户管理策略</option>
+         <option value="\x43">DDOS流量管理策略</option>
+		     <option value="\x44">DDOS保护策略对象绑定</option>
+		     <option value="\x80">AAA信息采集</option>
+       	 <option value="\x81">AAA信息下发</option>
+         <option value="\x82">静态用户信息下发</option>
+         <option value="\x83">AAA信息反查</option>
+         <option value="\x84">用户/应用策略绑定查询</option>
+         <option value="\x85">用户/应用策略信息下发</option>
+         <option value="\xc0">DPI通用信息下发</option>
+         <option value="\xc1">DPI设备心跳信息</option>
+         <option value="\xc2">DPI设备策略同步请求</option>
+         <option value="\xc3">DPI设备策略同步响应</option>
+         <option value="\xc4">DPI设备状态查询</option>
+         <option value="\xc5">DPI设备状态查询回应（静态信息）</option>
+         <option value="\xc6">DPI设备状态查询回应（动态信息）</option>
+         <option value="\xc7">协议特征库下发策略</option>
+         <option value="\xc8">URL分类库更新策略</option>
+         <option value="\xc9">应用名称对应更新通知</option>
+         <option value="\xca">IP地址库下发策略</option>
+         <option value="\xcb">广告触发网站列表定义</option>
+         <option value="\xcc">广告触发关键字列表定义</option>
+         <option value="\xcd">策略下发ACK</option>
+         <option value="\xff">随机信息类型</option>
+	    </select>
+	  	</div>
+	  	<div>
+	    <label for="uc_MessageNo_NU2">Message No.:</label>
+	    <input type="text" id="uc_Header_MessageNo" name="uc_MessageNo_NU2" class="cw40"/>
+	    <label for="uc_Header_MessageResv_NU1">保留(resv):</label>
+	    <input type="text" value="0"  name="uc_Header_MessageResv_NU1" class="cw40"/>
+	    </div>
+	    <div>
+	    <label for="uc_Header_MessageSeq_SQ4">Message SequenceNo.:</label>
+	    <select name="uc_Header_MessageSeq_SQ4">
+	    		<option value="\x00000000">不变</option>
+	    		<option value="\x00000001">加一</option>
+	    		<option value="\xffffffff">随机</option>
+	    </select>
+	    <input type="hidden" value="0" rel="MessageSeq"/>	    
+	    <label for="uc_Header_MessageLen_LN4">MessageLen(0为自动计算):</option>
+	    <input type="text" value="0" id="uc_Header_MessageLen" name="uc_Header_MessageLen_LN4" class="cw40"/>
+	    </div>
+	 </fieldset>
+   <fieldset>
+   	  <legend>UC Body</legend>
+      <textarea name="uc_body" id="uc_body"  rows="5" cols="20" style="margin: 2px; width: 284px; height: 147px;"></textarea>
+   </fieldset>   
+      <input type="submit" value="Submit"/>
+      <input type="hidden" name="next" value="{{ request.path }}"/>
+      {{ xsrf_form_html() }}
+				
+      </form>
+  </div>
+  </div>
+</div>
+<script src="{{ static_url("jquery-1.9.1.min.js") }}" type="text/javascript"></script>
+<script src="{{ static_url("jquery-ui-1.10.2.custom.js") }}" type="text/javascript"></script>
+<script src="{{ static_url("jquery-ui-timepicker-addon.js") }}" type="text/javascript"></script>
+<script src="{{ static_url("u01test.js") }}" type="text/javascript"></script>
+<script src="{{ static_url("garlic.js") }}" type="text/javascript"></script>
+<div id="dyinput_Time_hidden" style="display:none;">	
+	      <div>	
+	      	<ul>
+	      	<li>
+      	 <label for="">管理起始时间(C_Starttime):</label>
+       	 <input type="text" id="uc_Body_C_Starttime" name="uc_Body_C_Starttime_TI0" value="00/00/0000 00:00" class="cw120"/>
+       		</li>
+       		<li>
+         <label for="">管理终止时间(C_Stoptime):</label>
+         <input type="text" id="uc_Body_C_Stoptime" name="uc_Body_C_Stoptime_TI0" value="00/00/0000 00:00" class="cw120"/>
+         </li>
+       	</ul>
+     		</div>
+</div>     		
+<div id="dyinput_IP_hidden" style="display:none;">	
+	      <div>
+	      	<ul>	
+	      	<li>
+      	<label for="">IP地址长度(UserIPLength):</label>
+      	<select id="uc_Body_UserIPLength" name="uc_Body_UserIPLength_SN1">
+      		<option value="\x04">IPv4</option>
+      		<option value="\x10">IPv6</option>
+      	</select>
+      	</li>
+      	<li>
+      	<label for="">IP地址(UserIP):</label>
+      	<input type="text" id="uc_Body_UserIP" name="uc_Body_UserIP" value="0.0.0.0" class="cw100"/>
+      	<label for="">IP地址前缀(UserIP_Prefix):</label>
+      	<input type="text" id="uc_Body_UserIP_Prefix" name="uc_Body_UserIP_Prefix_NU1" class="cw40"/>
+      	</li>
+      	</ul>
+		</div>
+</div>
+<div id="dyinput_Message_hidden" style="display:none;">	
+	      <div>
+	      	<ul>
+	      	<li>	
+      	<label for="">策略类型(MessageType):</label>
+      	<select id="uc_Body_MessageType" name="uc_Body_MessageType_SE1" class="cw100">
+		     <option value="\x00">通用参数设置</option>
+      	 <option value="\x01">流量分析结果上报策略</option>
+         <option value="\x02">Web类流量管理策略</option>
+         <option value="\x03">URL分类批量查询</option>
+		     <option value="\x04">URL分类批量回应 </option>
+		     <option value="\x05">VOIP类流量管理策略</option>
+		     <option value="\x06">通用流量管理策略</option>
+         <option value="\x07">通用流量标记策略</option>
+         <option value="\x08">指定应用的用户统计策略</option>
+         <option value="\x09">流量镜像策略</option>
+         <option value="\x0a">应用自定义策略</option>
+         <option value="\x40">用户组归属分配策略</option>
+         <option value="\x41">Web信息推送策略</option>
+         <option value="\x42">1ToN用户管理策略</option>
+         <option value="\x43">DDOS流量管理策略</option>
+		     <option value="\x44">DDOS保护策略对象绑定</option>
+		     <option value="\x80">AAA信息采集</option>
+       	 <option value="\x81">AAA信息下发</option>
+         <option value="\x82">静态用户信息下发</option>
+         <option value="\x83">AAA信息反查</option>
+         <option value="\x84">用户/应用策略绑定查询</option>
+         <option value="\x85">用户/应用策略信息下发</option>
+         <option value="\xc0">DPI通用信息下发</option>
+         <option value="\xc1">DPI设备心跳信息</option>
+         <option value="\xc2">DPI设备策略同步请求</option>
+         <option value="\xc3">DPI设备策略同步响应</option>
+         <option value="\xc4">DPI设备状态查询</option>
+         <option value="\xc5">DPI设备状态查询回应（静态信息）</option>
+         <option value="\xc6">DPI设备状态查询回应（动态信息）</option>
+         <option value="\xc7">协议特征库下发策略</option>
+         <option value="\xc8">URL分类库更新策略</option>
+         <option value="\xc9">应用名称对应更新通知</option>
+         <option value="\xca">IP地址库下发策略</option>
+         <option value="\xcb">广告触发网站列表定义</option>
+         <option value="\xcc">广告触发关键字列表定义</option>
+         <option value="\xcd">策略下发ACK</option>
+         <option value="\xff">随机信息类型</option>
+	    	</select>
+	    	</li>
+	    	<li>
+	    	<label for="">策略号(Message No.):</label>
+	    	<input type="text" id="uc_Body_MessageNo" name="uc_Body_MessageNo_NU2" class="cw40"/>
+	    	</li>
+	    	</ul>
+	  	</div>
+</div>	
+</body>
+</html>
